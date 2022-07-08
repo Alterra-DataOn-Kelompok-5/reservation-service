@@ -10,7 +10,7 @@ type reservationUsecase struct {
 	reservationRepo domain.ReservationsRepository
 }
 
-func NewreservationUsecase(rv domain.ReservationsRepository) domain.ReservationsUsecase {
+func NewReservationUsecase(rv domain.ReservationsRepository) domain.ReservationsUsecase {
 	return &reservationUsecase{
 		reservationRepo: rv,
 	}

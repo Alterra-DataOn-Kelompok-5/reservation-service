@@ -33,7 +33,7 @@ func main() {
 	middleware.Init(e)
 
 	reservationRepo := _reservationRepo.NewMysqlReservationsRepository(database.GetConnection())
-	rvu := _reservationUc.NewreservationUsecase(reservationRepo)
+	rvu := _reservationUc.NewReservationUsecase(reservationRepo)
 	_reservationHttp.NewReservationsHandler(e, rvu)
 
 	log.Fatal(e.Start(":" + os.Getenv("SERVICE_PORT")))
