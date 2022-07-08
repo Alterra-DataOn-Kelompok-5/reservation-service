@@ -6,7 +6,7 @@ import (
 )
 
 type ReservationDetails struct {
-	Model
+	ID                   uint         `gorm:"primaryKey;autoIncrement"`
 	RoomID               int          `json:"room_id"`
 	ReservationTimeStart time.Time    `json:"reservation_time_start"`
 	ReservationTimeEnd   time.Time    `json:"reservation_time_end"`
