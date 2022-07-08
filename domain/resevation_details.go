@@ -19,7 +19,7 @@ type ReservationDetailsUsecase interface {
 	FetchByID(ctx context.Context, id int) (ReservationDetails, error)
 	Store(ctx context.Context, rvd *ReservationDetails) error
 	Update(ctx context.Context, rvd *ReservationDetails, id int) error
-	Delete(ctx context.Context, id int) error
+	// Delete(ctx context.Context, id int) error
 }
 
 type ReservationDetailsRepository interface {
@@ -27,5 +27,5 @@ type ReservationDetailsRepository interface {
 	FetchByID(ctx context.Context, id int) (ReservationDetails, error)
 	Store(ctx context.Context, rvd *ReservationDetails) error
 	Update(ctx context.Context, rvd *ReservationDetails, id int) error
-	Delete(ctx context.Context, id int) error
+	// Delete(ctx context.Context, id int) error
 }
