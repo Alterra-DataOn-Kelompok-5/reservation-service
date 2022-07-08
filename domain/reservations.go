@@ -9,7 +9,7 @@ type Reservations struct {
 	EmployeeID        int    `json:"employee_id"`
 	AdminID           int    `json:"admin_id"`
 	ReservationCode   string `json:"reservation_code"`
-	ReservationStatus int    `json:"reservation_status"`
+	ReservationStatus int    `json:"reservation_status" gorm:"default:0"`
 	ReservationDesc   string `json:"reservation_desc" gorm:"type:text"`
 }
 
