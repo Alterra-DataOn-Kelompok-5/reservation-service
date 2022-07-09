@@ -6,11 +6,12 @@ import (
 
 type Reservations struct {
 	Model
-	EmployeeID        int    `json:"employee_id"`
-	AdminID           int    `json:"admin_id"`
-	ReservationCode   string `json:"reservation_code"`
-	ReservationStatus int    `json:"reservation_status" gorm:"default:0"`
-	ReservationDesc   string `json:"reservation_desc" gorm:"type:text"`
+	EmployeeID         int                  `json:"employee_id"`
+	AdminID            int                  `json:"admin_id"`
+	ReservationCode    string               `json:"reservation_code"`
+	ReservationStatus  int                  `json:"reservation_status" gorm:"default:0"`
+	ReservationDesc    string               `json:"reservation_desc" gorm:"type:text"`
+	ReservationDetails []ReservationDetails `json:"reservation_detail" gorm:"foreignKey:ReservationID"`
 }
 
 type ReservationsUsecase interface {
