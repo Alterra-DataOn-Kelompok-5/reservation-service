@@ -27,6 +27,7 @@ type (
 		RoomID               uint   `json:"room_id"`
 		ReservationTimeStart string `json:"reservation_time_start"`
 		ReservationTimeEnd   string `json:"reservation_time_end"`
+		ReservationStatusID  uint   `json:"reservation_status_id"`
 	}
 	ReservationWithCUDResponse struct {
 		ReservationResponse

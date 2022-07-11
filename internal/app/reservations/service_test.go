@@ -8,17 +8,16 @@ import (
 	"github.com/Alterra-DataOn-Kelompok-5/reservation-service/database/seeder"
 	"github.com/Alterra-DataOn-Kelompok-5/reservation-service/internal/dto"
 	"github.com/Alterra-DataOn-Kelompok-5/reservation-service/internal/factory"
-	"github.com/Alterra-DataOn-Kelompok-5/reservation-service/internal/pkg/enum"
 	pkgdto "github.com/Alterra-DataOn-Kelompok-5/reservation-service/pkg/dto"
 	"github.com/stretchr/testify/assert"
 )
 
 var (
-	ctx         = context.Background()
-	roleService = NewService(factory.NewFactory())
+	ctx                = context.Background()
+	reservationService = NewService(factory.NewFactory())
 )
 
-func TestRoleServiceFindAllSuccess(t *testing.T) {
+func TestReservationServiceFindAllSuccess(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
@@ -28,18 +27,18 @@ func TestRoleServiceFindAllSuccess(t *testing.T) {
 		payload = pkgdto.SearchGetRequest{}
 	)
 
-	res, err := roleService.Find(ctx, &payload)
+	res, err := reservationService.Find(ctx, &payload)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	asserts.Len(res.Data, 2)
+	asserts.Len(res.Data, 3)
 	for _, val := range res.Data {
-		asserts.NotEmpty(val.Name)
+		asserts.NotEmpty(val.ReservationCode)
 		asserts.NotEmpty(val.ID)
 	}
 }
-func TestRoleServiceFindByIdSuccess(t *testing.T) {
+func TestReservationServiceFindByIdSuccess(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
@@ -49,7 +48,7 @@ func TestRoleServiceFindByIdSuccess(t *testing.T) {
 		payload = pkgdto.ByIDRequest{ID: 1}
 	)
 
-	res, err := roleService.FindByID(ctx, &payload)
+	res, err := reservationService.FindByID(ctx, &payload)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -57,7 +56,7 @@ func TestRoleServiceFindByIdSuccess(t *testing.T) {
 	asserts.Equal(uint(1), res.ID)
 }
 
-func TestRoleServiceFindByIdRecordNotFound(t *testing.T) {
+func TestReservationServiceFindByIdRecordNotFound(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 
@@ -66,13 +65,13 @@ func TestRoleServiceFindByIdRecordNotFound(t *testing.T) {
 		payload = pkgdto.ByIDRequest{ID: 1}
 	)
 
-	_, err := roleService.FindByID(ctx, &payload)
+	_, err := reservationService.FindByID(ctx, &payload)
 	if err != nil {
 		asserts.Equal(err.Error(), "error code 404")
 	}
 }
 
-func TestRoleServiceUpdataByIdSuccess(t *testing.T) {
+func TestReservationServiceUpdataByIdSuccess(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
@@ -80,107 +79,83 @@ func TestRoleServiceUpdataByIdSuccess(t *testing.T) {
 	var (
 		asserts = assert.New(t)
 		id      = uint(1)
-		name    = "Finance Dept."
-		payload = dto.UpdateRoleRequestBody{
-			ID:   &id,
-			Name: &name,
+		status  = uint(1)
+		payload = dto.UpdateReservationRequestBody{
+			ID:                  &id,
+			ReservationStatusID: &status,
 		}
 	)
-	res, err := roleService.UpdateById(ctx, &payload)
+	res, err := reservationService.UpdateById(ctx, &payload)
 	if err != nil {
 		t.Fatal(err)
 	}
-	asserts.Equal(name, res.Name)
+	asserts.Equal(status, res.ReservationStatusID)
 }
 
-func TestRoleServiceUpdateByIdRecordNotFound(t *testing.T) {
-	database.GetConnection()
-	seeder.NewSeeder().DeleteAll()
-
-	var (
-		asserts = assert.New(t)
-		id      = uint(1)
-		name    = "Finance Dept."
-		payload = dto.UpdateRoleRequestBody{
-			ID:   &id,
-			Name: &name,
-		}
-	)
-
-	_, err := roleService.UpdateById(ctx, &payload)
-	if err != nil {
-		asserts.Equal(err.Error(), "error code 404")
-	}
-}
-
-func TestRoleServiceDeleteByIdSuccess(t *testing.T) {
-	database.GetConnection()
-	seeder.NewSeeder().DeleteAll()
-	seeder.NewSeeder().SeedAll()
-
-	var (
-		asserts = assert.New(t)
-		id      = uint(1)
-		payload = pkgdto.ByIDRequest{ID: id}
-	)
-
-	res, err := roleService.DeleteById(ctx, &payload)
-	if err != nil {
-		t.Fatal(err)
-	}
-	asserts.NotNil(res.DeletedAt)
-}
-
-func TestRoleServiceDeleteByIdRecordNotFound(t *testing.T) {
+func TestReservationServiceUpdateByIdRecordNotFound(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 
 	var (
 		asserts = assert.New(t)
 		id      = uint(10)
-		payload = pkgdto.ByIDRequest{ID: id}
+		status  = uint(2)
+		payload = dto.UpdateReservationRequestBody{
+			ID:                  &id,
+			ReservationStatusID: &status,
+		}
 	)
 
-	_, err := roleService.DeleteById(ctx, &payload)
-	if asserts.Error(err) {
+	_, err := reservationService.UpdateById(ctx, &payload)
+	if err != nil {
 		asserts.Equal(err.Error(), "error code 404")
 	}
 }
 
-func TestRoleServiceCreateRoleSuccess(t *testing.T) {
+func TestReservationServiceCreateReservationSuccess(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 
 	var (
-		asserts = assert.New(t)
-		name    = "Finance Dept."
-		payload = dto.CreateRoleRequestBody{
-			Name: &name,
+		asserts              = assert.New(t)
+		code                 = "RSVN/20220710/005"
+		desc                 = "Reservasi ruang meeting"
+		employeeID           = uint(2)
+		roomID               = uint(4)
+		reservationTimeStart = "2022-07-10 16:00:00"
+		reservationTimeEnd   = "2022-07-10 17:00:00"
+		payload              = dto.CreateReservationRequestBody{
+			ReservationCode:      &code,
+			ReservationDesc:      &desc,
+			EmployeeID:           &employeeID,
+			RoomID:               &roomID,
+			ReservationTimeStart: &reservationTimeStart,
+			ReservationTimeEnd:   &reservationTimeEnd,
 		}
 	)
 
-	res, err := roleService.Store(ctx, &payload)
+	res, err := reservationService.Store(ctx, &payload)
 	if err != nil {
 		t.Fatal(err)
 	}
 	asserts.NotEmpty(res.ID)
-	asserts.Equal(*payload.Name, res.Name)
+	asserts.Equal(*payload.ReservationCode, res.ReservationCode)
 }
 
-func TestRoleServiceCreateRoleAlreadyExist(t *testing.T) {
+func TestReservationServiceCreateReservationAlreadyExist(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
 
 	var (
 		asserts = assert.New(t)
-		name    = enum.Role(testAdminRoleID).String()
-		payload = dto.CreateRoleRequestBody{
-			Name: &name,
+		code    = "RSVN/20220710/001"
+		payload = dto.CreateReservationRequestBody{
+			ReservationCode: &code,
 		}
 	)
 
-	_, err := roleService.Store(ctx, &payload)
+	_, err := reservationService.Store(ctx, &payload)
 	if asserts.Error(err) {
 		asserts.Equal(err.Error(), "error code 409")
 	}

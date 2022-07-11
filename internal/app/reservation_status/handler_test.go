@@ -21,56 +21,57 @@ import (
 )
 
 var (
-	adminClaims       = util.CreateJWTClaims(testEmail, testEmployeeID, testAdminRoleID, testDivisionID)
-	db                = database.GetConnection()
-	divisionHandler   = NewHandler(&f)
-	echoMock          = mocks.EchoMock{E: echo.New()}
-	f                 = factory.Factory{DivisionRepository: repository.NewDivisionRepository(db)}
-	testAdminRoleID   = uint(enum.Admin)
-	testCreatePayload = dto.CreateDivisionRequestBody{Name: &testDivisionName}
-	testDivisionID    = uint(enum.Finance)
-	testDivisionName  = enum.Division(testDivisionID).String()
-	testEmail         = "vincentlhubbard@superrito.com"
-	testEmployeeID    = uint(1)
-	testUpdatePayload = dto.UpdateDivisionRequestBody{ID: &testDivisionID, Name: &testDivisionName}
-	testUserRoleID    = uint(enum.User)
-	userClaims        = util.CreateJWTClaims(testEmail, testEmployeeID, testUserRoleID, testDivisionID)
+	testEmail                 = "vincentlhubbard@superrito.com"
+	testEmployeeID            = uint(1)
+	testAdminRoleID           = uint(enum.Admin)
+	testUserRoleID            = uint(enum.User)
+	testDivisionID            = uint(enum.Finance)
+	adminClaims               = util.CreateJWTClaims(testEmail, testEmployeeID, testAdminRoleID, testDivisionID)
+	userClaims                = util.CreateJWTClaims(testEmail, testEmployeeID, testUserRoleID, testDivisionID)
+	db                        = database.GetConnection()
+	reservationStatusHandler  = NewHandler(&f)
+	f                         = factory.Factory{ReservationStatusRepository: repository.NewStatusRepository(db)}
+	testCreatePayload         = dto.CreateReservationStatusRequestBody{ReservationStatusName: &testReservationStatusName}
+	echoMock                  = mocks.EchoMock{E: echo.New()}
+	testReservationStatusID   = uint(enum.Reserved)
+	testReservationStatusName = enum.Status(testReservationStatusID).String()
+	testUpdatePayload         = dto.UpdateReservationStatusRequestBody{ID: &testReservationStatusID, ReservationStatusName: &testReservationStatusName}
 )
 
-func TestDivisionHandlerGetInvalidPayload(t *testing.T) {
+func TestReservationStatusHandlerGetInvalidPayload(t *testing.T) {
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
 	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	c.SetPath("/api/v1/divisions")
+	c.SetPath("/api/v1/status")
 	c.QueryParams().Add("page", "a")
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	// testing
 	asserts := assert.New(t)
-	if asserts.NoError(divisionHandler.Get(c)) {
+	if asserts.NoError(reservationStatusHandler.Get(c)) {
 		asserts.Equal(400, rec.Code)
 
 		body := rec.Body.String()
 		asserts.Contains(body, "Bad Request")
 	}
 }
-func TestDivisionHandlerGetUnauthorized(t *testing.T) {
+func TestReservationStatusHandlerGetUnauthorized(t *testing.T) {
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
-	c.SetPath("/api/v1/divisions")
+	c.SetPath("/api/v1/status")
 
 	// testing
 	asserts := assert.New(t)
-	if asserts.NoError(divisionHandler.Get(c)) {
+	if asserts.NoError(reservationStatusHandler.Get(c)) {
 		asserts.Equal(401, rec.Code)
 		body := rec.Body.String()
 		asserts.Contains(body, "unauthorized")
 	}
 }
 
-func TestDivisionHandlerGetSuccess(t *testing.T) {
+func TestReservationStatusHandlerGetSuccess(t *testing.T) {
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
 	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
@@ -79,37 +80,37 @@ func TestDivisionHandlerGetSuccess(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
 
-	c.SetPath("/api/v1/divisions")
+	c.SetPath("/api/v1/status")
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	// testing
 	asserts := assert.New(t)
-	if asserts.NoError(divisionHandler.Get(c)) {
+	if asserts.NoError(reservationStatusHandler.Get(c)) {
 		asserts.Equal(200, rec.Code)
 
 		body := rec.Body.String()
 		asserts.Contains(body, "id")
-		asserts.Contains(body, "name")
+		asserts.Contains(body, "reservation_status_name")
 	}
 }
 
-func TestDivisionHandlerGetByIdInvalidPayload(t *testing.T) {
+func TestReservationStatusHandlerGetByIdInvalidPayload(t *testing.T) {
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
-	divisionID := "a"
+	reservatoinStatusID := "a"
 
 	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	c.SetPath("/api/v1/divisions")
+	c.SetPath("/api/v1/status")
 	c.SetParamNames("id")
-	c.SetParamValues(divisionID)
+	c.SetParamValues(reservatoinStatusID)
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	// testing
 	asserts := assert.New(t)
-	if asserts.NoError(divisionHandler.GetById(c)) {
+	if asserts.NoError(reservationStatusHandler.GetById(c)) {
 		asserts.Equal(400, rec.Code)
 
 		body := rec.Body.String()
@@ -117,24 +118,24 @@ func TestDivisionHandlerGetByIdInvalidPayload(t *testing.T) {
 	}
 }
 
-func TestDivisionHandlerGetByIdNotFound(t *testing.T) {
+func TestReservationStatusHandlerGetByIdNotFound(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
-	divisionID := strconv.Itoa(int(testDivisionID))
+	reservatoinStatusID := strconv.Itoa(int(testReservationStatusID))
 	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	c.SetPath("/api/v1/divisions")
+	c.SetPath("/api/v1/status")
 	c.SetParamNames("id")
-	c.SetParamValues(divisionID)
+	c.SetParamValues(reservatoinStatusID)
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	// testing
 	asserts := assert.New(t)
-	if asserts.NoError(divisionHandler.GetById(c)) {
+	if asserts.NoError(reservationStatusHandler.GetById(c)) {
 		asserts.Equal(404, rec.Code)
 
 		body := rec.Body.String()
@@ -142,44 +143,44 @@ func TestDivisionHandlerGetByIdNotFound(t *testing.T) {
 	}
 }
 
-func TestDivisionHandlerGetByIdUnauthorized(t *testing.T) {
+func TestReservationStatusHandlerGetByIdUnauthorized(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
-	divisionID := strconv.Itoa(int(testDivisionID))
+	reservatoinStatusID := strconv.Itoa(int(testReservationStatusID))
 
-	c.SetPath("/api/v1/divisions")
+	c.SetPath("/api/v1/status")
 	c.SetParamNames("id")
-	c.SetParamValues(divisionID)
+	c.SetParamValues(reservatoinStatusID)
 
 	// testing
 	asserts := assert.New(t)
-	if asserts.NoError(divisionHandler.GetById(c)) {
+	if asserts.NoError(reservationStatusHandler.GetById(c)) {
 		asserts.Equal(401, rec.Code)
 		body := rec.Body.String()
 		asserts.Contains(body, "unauthorized")
 	}
 }
 
-func TestDivisionHandlerGetByIdSuccess(t *testing.T) {
+func TestReservationStatusHandlerGetByIdSuccess(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
 
 	c, rec := echoMock.RequestMock(http.MethodGet, "/", nil)
-	divisionID := strconv.Itoa(int(testDivisionID))
+	reservationStatusID := strconv.Itoa(int(testReservationStatusID))
 	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	c.SetPath("/api/v1/divisions")
+	c.SetPath("/api/v1/status")
 	c.SetParamNames("id")
-	c.SetParamValues(divisionID)
+	c.SetParamValues(reservationStatusID)
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	// testing
 	asserts := assert.New(t)
-	if asserts.NoError(divisionHandler.GetById(c)) {
+	if asserts.NoError(reservationStatusHandler.GetById(c)) {
 		asserts.Equal(200, rec.Code)
 
 		body := rec.Body.String()
@@ -188,22 +189,22 @@ func TestDivisionHandlerGetByIdSuccess(t *testing.T) {
 	}
 }
 
-func TestDivisionHandlerUpdateByIdInvalidPayload(t *testing.T) {
+func TestReservationStatusHandlerUpdateByIdInvalidPayload(t *testing.T) {
 	c, rec := echoMock.RequestMock(http.MethodPut, "/", nil)
-	divisionID := "a"
+	reservationStatusID := "a"
 	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	c.SetPath("/api/v1/divisions")
+	c.SetPath("/api/v1/status")
 	c.SetParamNames("id")
-	c.SetParamValues(divisionID)
+	c.SetParamValues(reservationStatusID)
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	// testing
 	asserts := assert.New(t)
-	if asserts.NoError(divisionHandler.UpdateById(c)) {
+	if asserts.NoError(reservationStatusHandler.UpdateById(c)) {
 		asserts.Equal(400, rec.Code)
 
 		body := rec.Body.String()
@@ -211,7 +212,7 @@ func TestDivisionHandlerUpdateByIdInvalidPayload(t *testing.T) {
 	}
 }
 
-func TestDivisionHandlerUpdateByIdNotFound(t *testing.T) {
+func TestReservationStatusHandlerUpdateByIdNotFound(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 
 	payload, err := json.Marshal(testUpdatePayload)
@@ -219,36 +220,36 @@ func TestDivisionHandlerUpdateByIdNotFound(t *testing.T) {
 		t.Fatal(err)
 	}
 	c, rec := echoMock.RequestMock(http.MethodPut, "/", bytes.NewBuffer(payload))
-	divisionID := strconv.Itoa(int(testDivisionID))
+	reservationStatusID := strconv.Itoa(int(testReservationStatusID))
 	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	c.SetPath("/divisions")
+	c.SetPath("/status")
 	c.SetParamNames("id")
-	c.SetParamValues(divisionID)
+	c.SetParamValues(reservationStatusID)
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 	c.Request().Header.Set("Content-Type", "application/json")
 
 	// testing
 	asserts := assert.New(t)
-	if asserts.NoError(divisionHandler.UpdateById(c)) {
+	if asserts.NoError(reservationStatusHandler.UpdateById(c)) {
 		asserts.Equal(404, rec.Code)
 
 		body := rec.Body.String()
 		asserts.Contains(body, "Data not found")
 	}
 }
-func TestDivisionHandlerUpdateByIdUnauthorized(t *testing.T) {
+func TestReservationStatusHandlerUpdateByIdUnauthorized(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 
 	c, rec := echoMock.RequestMock(http.MethodPut, "/", nil)
-	divisionID := strconv.Itoa(int(testDivisionID))
+	reservationStatusID := strconv.Itoa(int(testReservationStatusID))
 
-	c.SetPath("/api/v1/divisions")
+	c.SetPath("/api/v1/status")
 	c.SetParamNames("id")
-	c.SetParamValues(divisionID)
+	c.SetParamValues(reservationStatusID)
 
 	token, err := util.CreateJWTToken(userClaims)
 	if err != nil {
@@ -258,14 +259,14 @@ func TestDivisionHandlerUpdateByIdUnauthorized(t *testing.T) {
 
 	// testing
 	asserts := assert.New(t)
-	if asserts.NoError(divisionHandler.UpdateById(c)) {
+	if asserts.NoError(reservationStatusHandler.UpdateById(c)) {
 		asserts.Equal(401, rec.Code)
 		body := rec.Body.String()
 		asserts.Contains(body, "unauthorized")
 	}
 }
 
-func TestDivisionHandlerUpdateByIdSuccess(t *testing.T) {
+func TestReservationStatusHandlerUpdateByIdSuccess(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
 
@@ -274,21 +275,21 @@ func TestDivisionHandlerUpdateByIdSuccess(t *testing.T) {
 		t.Fatal(err)
 	}
 	c, rec := echoMock.RequestMock(http.MethodPut, "/", bytes.NewBuffer(payload))
-	divisionID := strconv.Itoa(int(testDivisionID))
+	reservationStatusID := strconv.Itoa(int(testReservationStatusID))
 	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	c.SetPath("/divisions")
+	c.SetPath("/status")
 	c.SetParamNames("id")
-	c.SetParamValues(divisionID)
+	c.SetParamValues(reservationStatusID)
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 	c.Request().Header.Set("Content-Type", "application/json")
 
 	// testing
 	asserts := assert.New(t)
-	if asserts.NoError(divisionHandler.UpdateById(c)) {
+	if asserts.NoError(reservationStatusHandler.UpdateById(c)) {
 		asserts.Equal(200, rec.Code)
 
 		body := rec.Body.String()
@@ -297,126 +298,25 @@ func TestDivisionHandlerUpdateByIdSuccess(t *testing.T) {
 	}
 }
 
-func TestDivisionHandlerDeleteByIdInvalidPayload(t *testing.T) {
-	c, rec := echoMock.RequestMock(http.MethodDelete, "/", nil)
-	divisionID := "a"
+func TestReservationStatusHandlerCreateInvalidPayload(t *testing.T) {
 	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	c.SetPath("/divisions")
-	c.SetParamNames("id")
-	c.SetParamValues(divisionID)
-	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
-
-	// testing
-	asserts := assert.New(t)
-	if asserts.NoError(divisionHandler.DeleteById(c)) {
-		asserts.Equal(400, rec.Code)
-
-		body := rec.Body.String()
-		asserts.Contains(body, "Bad Request")
-	}
-}
-
-func TestDivisionHandlerDeleteByIdNotFound(t *testing.T) {
-	seeder.NewSeeder().DeleteAll()
-
-	c, rec := echoMock.RequestMock(http.MethodDelete, "/", nil)
-	divisionID := strconv.Itoa(int(testDivisionID))
-	token, err := util.CreateJWTToken(adminClaims)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	c.SetPath("/divisions")
-	c.SetParamNames("id")
-	c.SetParamValues(divisionID)
-	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
-
-	// testing
-	asserts := assert.New(t)
-	if asserts.NoError(divisionHandler.DeleteById(c)) {
-		asserts.Equal(404, rec.Code)
-
-		body := rec.Body.String()
-		asserts.Contains(body, "Data not found")
-	}
-}
-
-func TestDivisionHandlerDeleteByIdUnauthorized(t *testing.T) {
-	seeder.NewSeeder().DeleteAll()
-
-	c, rec := echoMock.RequestMock(http.MethodDelete, "/", nil)
-	divisionID := strconv.Itoa(int(testDivisionID))
-
-	c.SetPath("/api/v1/divisions")
-	c.SetParamNames("id")
-	c.SetParamValues(divisionID)
-
-	token, err := util.CreateJWTToken(userClaims)
-	if err != nil {
-		t.Fatal(err)
-	}
-	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
-
-	// testing
-	asserts := assert.New(t)
-	if asserts.NoError(divisionHandler.DeleteById(c)) {
-		asserts.Equal(401, rec.Code)
-		body := rec.Body.String()
-		asserts.Contains(body, "unauthorized")
-	}
-}
-
-func TestDivisionHandlerDeleteByIdSuccess(t *testing.T) {
-	seeder.NewSeeder().DeleteAll()
-	seeder.NewSeeder().SeedAll()
-
-	c, rec := echoMock.RequestMock(http.MethodDelete, "/", nil)
-	divisionID := strconv.Itoa(int(testDivisionID))
-	token, err := util.CreateJWTToken(adminClaims)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	c.SetPath("/divisions")
-	c.SetParamNames("id")
-	c.SetParamValues(divisionID)
-	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
-
-	// testing
-	asserts := assert.New(t)
-	if asserts.NoError(divisionHandler.DeleteById(c)) {
-		asserts.Equal(200, rec.Code)
-
-		body := rec.Body.String()
-		asserts.Contains(body, "id")
-		asserts.Contains(body, "name")
-		asserts.Contains(body, "deleted_at")
-	}
-}
-
-func TestDivisionHandlerCreateInvalidPayload(t *testing.T) {
-	token, err := util.CreateJWTToken(adminClaims)
-	if err != nil {
-		t.Fatal(err)
-	}
-	payload, err := json.Marshal(dto.CreateDivisionRequestBody{})
+	payload, err := json.Marshal(dto.CreateReservationStatusRequestBody{})
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	c, rec := echoMock.RequestMock(http.MethodPost, "/", bytes.NewBuffer(payload))
 
-	c.SetPath("/api/v1/divisions")
+	c.SetPath("/api/v1/status")
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 	c.Request().Header.Set("Content-Type", "application/json")
 
 	// testing
 	asserts := assert.New(t)
-	if asserts.NoError(divisionHandler.Create(c)) {
+	if asserts.NoError(reservationStatusHandler.Create(c)) {
 		asserts.Equal(400, rec.Code)
 
 		body := rec.Body.String()
@@ -424,7 +324,7 @@ func TestDivisionHandlerCreateInvalidPayload(t *testing.T) {
 	}
 }
 
-func TestDivisionHandlerCreateDivisionAlreadyExist(t *testing.T) {
+func TestReservationStatusHandlerCreateDivisionAlreadyExist(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
 
@@ -432,21 +332,21 @@ func TestDivisionHandlerCreateDivisionAlreadyExist(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	name := enum.Division(testDivisionID).String()
-	payload, err := json.Marshal(dto.CreateDivisionRequestBody{Name: &name})
+	name := enum.Status(testReservationStatusID).String()
+	payload, err := json.Marshal(dto.CreateReservationStatusRequestBody{ReservationStatusName: &name})
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	c, rec := echoMock.RequestMock(http.MethodPost, "/", bytes.NewBuffer(payload))
 
-	c.SetPath("/api/v1/divisions")
+	c.SetPath("/api/v1/status")
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 	c.Request().Header.Set("Content-Type", "application/json")
 
 	// testing
 	asserts := assert.New(t)
-	if asserts.NoError(divisionHandler.Create(c)) {
+	if asserts.NoError(reservationStatusHandler.Create(c)) {
 		asserts.Equal(409, rec.Code)
 
 		body := rec.Body.String()
@@ -454,7 +354,7 @@ func TestDivisionHandlerCreateDivisionAlreadyExist(t *testing.T) {
 	}
 }
 
-func TestDivisionHandlerCreateUnauthorized(t *testing.T) {
+func TestReservationStatusHandlerCreateUnauthorized(t *testing.T) {
 	payload, err := json.Marshal(testCreatePayload)
 	if err != nil {
 		t.Fatal(err)
@@ -462,7 +362,7 @@ func TestDivisionHandlerCreateUnauthorized(t *testing.T) {
 
 	c, rec := echoMock.RequestMock(http.MethodPost, "/", bytes.NewBuffer(payload))
 
-	c.SetPath("/api/v1/divisions")
+	c.SetPath("/api/v1/status")
 	c.Request().Header.Set("Content-Type", "application/json")
 
 	token, err := util.CreateJWTToken(userClaims)
@@ -473,7 +373,7 @@ func TestDivisionHandlerCreateUnauthorized(t *testing.T) {
 
 	// testing
 	asserts := assert.New(t)
-	if asserts.NoError(divisionHandler.Create(c)) {
+	if asserts.NoError(reservationStatusHandler.Create(c)) {
 		asserts.Equal(401, rec.Code)
 
 		body := rec.Body.String()
@@ -481,7 +381,7 @@ func TestDivisionHandlerCreateUnauthorized(t *testing.T) {
 	}
 }
 
-func TestDivisionHandlerCreateSuccess(t *testing.T) {
+func TestReservationStatusHandlerCreateSuccess(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 
 	token, err := util.CreateJWTToken(adminClaims)
@@ -495,13 +395,13 @@ func TestDivisionHandlerCreateSuccess(t *testing.T) {
 
 	c, rec := echoMock.RequestMock(http.MethodPost, "/", bytes.NewBuffer(payload))
 
-	c.SetPath("/api/v1/divisions")
+	c.SetPath("/api/v1/status")
 	c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 	c.Request().Header.Set("Content-Type", "application/json")
 
 	// testing
 	asserts := assert.New(t)
-	if asserts.NoError(divisionHandler.Create(c)) {
+	if asserts.NoError(reservationStatusHandler.Create(c)) {
 		asserts.Equal(200, rec.Code)
 
 		body := rec.Body.String()
