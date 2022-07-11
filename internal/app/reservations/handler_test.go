@@ -34,7 +34,6 @@ var (
 	reservationHandler      = NewHandler(&f)
 	testReservationID       = uint(3)
 	testReservationCode     = "RSVN/20220710/005"
-	testRoomID              = uint(1)
 	testReservationStatusID = uint(2)
 	testCreatePayload       = dto.CreateReservationRequestBody{ReservationCode: &testReservationCode}
 	testUpdatePayload       = dto.UpdateReservationRequestBody{ID: &testReservationID, ReservationStatusID: &testReservationStatusID}
