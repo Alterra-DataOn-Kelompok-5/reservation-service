@@ -7,17 +7,19 @@ import (
 	"gorm.io/gorm"
 )
 
-type dbConfig struct {
-	Host string
-	User string
-	Pass string
-	Port string
-	Name string
-}
+type (
+	dbConfig struct {
+		Host string
+		User string
+		Pass string
+		Port string
+		Name string
+	}
 
-type mysqlConfig struct {
-	dbConfig
-}
+	mysqlConfig struct {
+		dbConfig
+	}
+)
 
 func (conf mysqlConfig) Connect() {
 	dsn := fmt.Sprintf(
