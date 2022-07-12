@@ -96,13 +96,22 @@ func (r *reservations) ExistByReservation(ctx context.Context, roomID uint, star
 }
 
 func (r *reservations) Save(ctx context.Context, reservation *dto.CreateReservationRequestBody) (model.Reservations, error) {
-	newReservation := model.Reservations{
-		ReservationCode:      *reservation.ReservationCode,
-		ReservationDesc:      *reservation.ReservationDesc,
-		EmployeeID:           *reservation.EmployeeID,
-		RoomID:               *reservation.RoomID,
-		ReservationTimeStart: *reservation.ReservationTimeStart,
-		ReservationTimeEnd:   *reservation.ReservationTimeEnd,
+	var newReservation model.Reservations
+	newReservation.ReservationCode = reservation.ReservationCode
+	if reservation.ReservationDesc != nil {
+		newReservation.ReservationDesc = *reservation.ReservationDesc
+	}
+	if reservation.EmployeeID != nil {
+		newReservation.EmployeeID = *reservation.EmployeeID
+	}
+	if reservation.RoomID != nil {
+		newReservation.RoomID = *reservation.RoomID
+	}
+	if reservation.ReservationTimeStart != nil {
+		newReservation.ReservationTimeStart = *reservation.ReservationTimeStart
+	}
+	if reservation.ReservationTimeEnd != nil {
+		newReservation.ReservationTimeEnd = *reservation.ReservationTimeEnd
 	}
 	if err := r.Db.WithContext(ctx).Save(&newReservation).Error; err != nil {
 		return newReservation, err

@@ -18,6 +18,10 @@ func (s *seed) SeedAll() {
 	reservationSeeder(s.DB)
 }
 
+func (s *seed) SeedReservationStatus() {
+	reservationStatusSeeder(s.DB)
+}
+
 func (s *seed) DeleteAll() {
 	s.DB.Exec("DELETE FROM reservations")
 	s.DB.Exec("DELETE FROM reservation_statuses")

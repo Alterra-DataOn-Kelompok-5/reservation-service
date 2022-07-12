@@ -94,7 +94,7 @@ func (s *service) FindByID(ctx context.Context, payload *pkgdto.ByIDRequest) (*d
 }
 
 func (s *service) Store(ctx context.Context, payload *dto.CreateReservationRequestBody) (*dto.ReservationDetailResponse, error) {
-	isExist, err := s.ReservationsRepository.ExistByCode(ctx, *payload.ReservationCode)
+	isExist, err := s.ReservationsRepository.ExistByCode(ctx, payload.ReservationCode)
 	if err != nil {
 		return &dto.ReservationDetailResponse{}, res.ErrorBuilder(&res.ErrorConstant.InternalServerError, err)
 	}
@@ -167,6 +167,7 @@ func (s *service) UpdateById(ctx context.Context, payload *dto.UpdateReservation
 			RoomID:               reservation.RoomID,
 			ReservationTimeStart: reservation.ReservationTimeStart,
 			ReservationTimeEnd:   reservation.ReservationTimeEnd,
+			ReservationStatusID:  reservation.ReservationStatusID,
 		},
 		Status: dto.ReservationStatusResponse{
 			ID:                    reservation.ReservationStatus.ID,

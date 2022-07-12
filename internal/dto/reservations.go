@@ -6,12 +6,12 @@ import (
 
 type (
 	CreateReservationRequestBody struct {
-		ReservationCode      *string `json:"reservation_code" validate:"required"`
-		ReservationDesc      *string `json:"reservation_desc" validate:"omitempty"`
-		EmployeeID           *uint   `json:"employee_id" validate:"omitempty"`
-		RoomID               *uint   `json:"room_id" validate:"omitempty"`
-		ReservationTimeStart *string `json:"reservation_time_start" validate:"omitempty"`
-		ReservationTimeEnd   *string `json:"reservation_time_end" validate:"omitempty"`
+		ReservationCode      string `json:"reservation_code" validate:"required"`
+		ReservationDesc      *string `json:"reservation_desc" validate:"required"`
+		EmployeeID           *uint   `json:"employee_id" validate:"required"`
+		RoomID               *uint   `json:"room_id" validate:"required"`
+		ReservationTimeStart *string `json:"reservation_time_start" validate:"required"`
+		ReservationTimeEnd   *string `json:"reservation_time_end" validate:"required"`
 	}
 	UpdateReservationRequestBody struct {
 		ID                  *uint `param:"id" validate:"required"`
