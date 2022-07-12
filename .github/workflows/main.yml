@@ -17,8 +17,8 @@ jobs:
 
       - name: Deploy to Server EC2
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-          REMOTE_HOST: ${{ secrets.HOST_DNS }}
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_RESERVATION_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.HOST_DNS_RESERVATION }}
           REMOTE_USER: ${{ secrets.USERNAME }}
           DOCKER_HUB_CONTAINER: ${{ secrets.DOCKER_HUB_RESERVATION }}
         run: |
@@ -27,8 +27,8 @@ jobs:
           
             #Now we have got the access of EC2 and we will start the deploy .
               docker pull ${DOCKER_HUB_CONTAINER} &&
-              docker container stop reservation-api &&
-              docker container rm reservation-api &&
-              docker container create --name reservation-api -p 8082:8082 ${DOCKER_HUB_CONTAINER} &&
-              docker container start reservation-api
+              #docker container stop reservation-api &&
+              #docker container rm reservation-api &&
+              #docker container create --name reservation-api -p 8082:8082 ${DOCKER_HUB_CONTAINER} &&
+              #docker container start reservation-api
           '
