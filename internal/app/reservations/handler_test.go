@@ -33,10 +33,21 @@ var (
 	f                       = factory.Factory{ReservationsRepository: repository.NewReservationsRepository(db)}
 	reservationHandler      = NewHandler(&f)
 	testReservationID       = uint(3)
-	testReservationCode     = "RSVN/20220710/005"
-	testReservationStatusID = uint(2)
-	testCreatePayload       = dto.CreateReservationRequestBody{ReservationCode: &testReservationCode}
-	testUpdatePayload       = dto.UpdateReservationRequestBody{ID: &testReservationID, ReservationStatusID: &testReservationStatusID}
+	testReservationCode     = "RSVN/20220709/005"
+	testReservationDesc     = "reservation test"
+	testReservationStatusID = uint(1)
+	testRoomID              = uint(2)
+	testTimeStart           = "2022-05-10 07:00:00"
+	testTimeEnd             = "2022-05-10 08:00:00"
+	testCreatePayload       = dto.CreateReservationRequestBody{
+		ReservationCode:      &testReservationCode,
+		ReservationDesc:      &testReservationDesc,
+		EmployeeID:           &testEmployeeID,
+		RoomID:               &testRoomID,
+		ReservationTimeStart: &testTimeStart,
+		ReservationTimeEnd:   &testTimeEnd,
+	}
+	testUpdatePayload = dto.UpdateReservationRequestBody{ID: &testReservationID, AdminID: &testEmployeeID, ReservationStatusID: &testReservationStatusID}
 )
 
 func TestReservationsHandlerGetInvalidPayload(t *testing.T) {

@@ -12,10 +12,10 @@ import (
 )
 
 var (
-	ctx                 = context.Background()
-	reservationService  = NewService(factory.NewFactory())
-	testFindAllPayload  = pkgdto.SearchGetRequest{}
-	testFindByIdPayload = pkgdto.ByIDRequest{ID: 1}
+	ctx                      = context.Background()
+	reservationStatusService = NewService(factory.NewFactory())
+	testFindAllPayload       = pkgdto.SearchGetRequest{}
+	testFindByIdPayload      = pkgdto.ByIDRequest{ID: 1}
 )
 
 func TestReservationStatusServiceFindAllSuccess(t *testing.T) {
@@ -24,7 +24,7 @@ func TestReservationStatusServiceFindAllSuccess(t *testing.T) {
 	seeder.NewSeeder().SeedAll()
 
 	asserts := assert.New(t)
-	res, err := reservationService.Find(ctx, &testFindAllPayload)
+	res, err := reservationStatusService.Find(ctx, &testFindAllPayload)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,7 +41,7 @@ func TestReservationStatusServiceFindByIdSuccess(t *testing.T) {
 	seeder.NewSeeder().SeedAll()
 
 	asserts := assert.New(t)
-	res, err := reservationService.FindByID(ctx, &testFindByIdPayload)
+	res, err := reservationStatusService.FindByID(ctx, &testFindByIdPayload)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,7 +54,7 @@ func TestReservationStatusServiceFindByIdRecordNotFound(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 
 	asserts := assert.New(t)
-	_, err := reservationService.FindByID(ctx, &testFindByIdPayload)
+	_, err := reservationStatusService.FindByID(ctx, &testFindByIdPayload)
 	if err != nil {
 		asserts.Equal(err.Error(), "error code 404")
 	}
@@ -66,7 +66,7 @@ func TestReservationStatusServiceUpdataByIdSuccess(t *testing.T) {
 	seeder.NewSeeder().SeedAll()
 
 	asserts := assert.New(t)
-	res, err := reservationService.UpdateById(ctx, &testUpdatePayload)
+	res, err := reservationStatusService.UpdateById(ctx, &testUpdatePayload)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,7 +78,7 @@ func TestReservationStatusServiceUpdateByIdRecordNotFound(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 
 	asserts := assert.New(t)
-	_, err := reservationService.UpdateById(ctx, &testUpdatePayload)
+	_, err := reservationStatusService.UpdateById(ctx, &testUpdatePayload)
 	if err != nil {
 		asserts.Equal(err.Error(), "error code 404")
 	}
@@ -89,7 +89,7 @@ func TestReservationStatusServiceCreateStatusSuccess(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 
 	asserts := assert.New(t)
-	res, err := reservationService.Store(ctx, &testCreatePayload)
+	res, err := reservationStatusService.Store(ctx, &testCreatePayload)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -103,7 +103,7 @@ func TestReservationStatusServiceCreateStatusAlreadyExist(t *testing.T) {
 	seeder.NewSeeder().SeedAll()
 
 	asserts := assert.New(t)
-	_, err := reservationService.Store(ctx, &testCreatePayload)
+	_, err := reservationStatusService.Store(ctx, &testCreatePayload)
 	if asserts.Error(err) {
 		asserts.Equal(err.Error(), "error code 409")
 	}

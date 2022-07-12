@@ -2,6 +2,7 @@ package reservations
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/Alterra-DataOn-Kelompok-5/reservation-service/database"
@@ -71,25 +72,29 @@ func TestReservationServiceFindByIdRecordNotFound(t *testing.T) {
 	}
 }
 
-func TestReservationServiceUpdataByIdSuccess(t *testing.T) {
+func TestReservationServiceUpdateByIdSuccess(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
 	seeder.NewSeeder().SeedAll()
 
 	var (
 		asserts = assert.New(t)
-		id      = uint(1)
-		status  = uint(1)
-		payload = dto.UpdateReservationRequestBody{
-			ID:                  &id,
-			ReservationStatusID: &status,
-		}
+		// id      = uint(1)
+		// adminId = uint(1)
+		// status  = uint(1)
+		// payload = dto.UpdateReservationRequestBody{
+		// 	ID:                  &id,
+		// 	AdminID:             &adminId,
+		// 	ReservationStatusID: &status,
+		// }
 	)
-	res, err := reservationService.UpdateById(ctx, &payload)
+	res, err := reservationService.UpdateById(ctx, &testUpdatePayload)
+	fmt.Println("res stat id", res.ReservationStatusID)
+	fmt.Println("res", res)
 	if err != nil {
 		t.Fatal(err)
 	}
-	asserts.Equal(status, res.ReservationStatusID)
+	asserts.Equal(testReservationStatusID, res.ReservationStatusID)
 }
 
 func TestReservationServiceUpdateByIdRecordNotFound(t *testing.T) {
@@ -117,29 +122,16 @@ func TestReservationServiceCreateReservationSuccess(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
 
 	var (
-		asserts              = assert.New(t)
-		code                 = "RSVN/20220710/005"
-		desc                 = "Reservasi ruang meeting"
-		employeeID           = uint(2)
-		roomID               = uint(4)
-		reservationTimeStart = "2022-07-10 16:00:00"
-		reservationTimeEnd   = "2022-07-10 17:00:00"
-		payload              = dto.CreateReservationRequestBody{
-			ReservationCode:      &code,
-			ReservationDesc:      &desc,
-			EmployeeID:           &employeeID,
-			RoomID:               &roomID,
-			ReservationTimeStart: &reservationTimeStart,
-			ReservationTimeEnd:   &reservationTimeEnd,
-		}
+		asserts = assert.New(t)
 	)
 
-	res, err := reservationService.Store(ctx, &payload)
+	res, err := reservationService.Store(ctx, &testCreatePayload)
+	fmt.Println("res:", res)
 	if err != nil {
 		t.Fatal(err)
 	}
 	asserts.NotEmpty(res.ID)
-	asserts.Equal(*payload.ReservationCode, res.ReservationCode)
+	asserts.Equal(*testCreatePayload.ReservationCode, res.ReservationCode)
 }
 
 func TestReservationServiceCreateReservationAlreadyExist(t *testing.T) {
