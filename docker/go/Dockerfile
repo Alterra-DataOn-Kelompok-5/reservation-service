@@ -12,5 +12,5 @@ RUN apk update && apk add tzdata
 ENV TZ=Asia/Jakarta
 COPY --from=builder /app/main .
 COPY --from=builder /app/.env .
-EXPOSE 8000
+EXPOSE 8082
 CMD [ "./main","-m=migrate" ]
