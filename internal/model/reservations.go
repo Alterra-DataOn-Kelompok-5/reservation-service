@@ -6,7 +6,7 @@ type Reservations struct {
 	ID                   uint              `json:"id"`
 	CreatedAt            time.Time         `json:"created_at" gorm:"type:datetime"`
 	UpdatedAt            time.Time         `json:"updated_at" gorm:"type:datetime"`
-	ReservationCode      string            `json:"reservation_code"`
+	ReservationCode      string            `json:"reservation_code" gorm:"varchar;not_null;unique"`
 	ReservationDesc      string            `json:"reservation_desc" gorm:"type:text"`
 	EmployeeID           uint              `json:"employee_id"`
 	AdminID              uint              `json:"admin_id" gorm:"default:null"`

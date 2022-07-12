@@ -33,14 +33,14 @@ var (
 	f                       = factory.Factory{ReservationsRepository: repository.NewReservationsRepository(db)}
 	reservationHandler      = NewHandler(&f)
 	testReservationID       = uint(3)
-	testReservationCode     = "RSVN/20220709/005"
+	testReservationCode     = "RSVN/20220710/001"
 	testReservationDesc     = "reservation test"
 	testReservationStatusID = uint(1)
 	testRoomID              = uint(2)
 	testTimeStart           = "2022-05-10 07:00:00"
 	testTimeEnd             = "2022-05-10 08:00:00"
 	testCreatePayload       = dto.CreateReservationRequestBody{
-		ReservationCode:      &testReservationCode,
+		ReservationCode:      testReservationCode,
 		ReservationDesc:      &testReservationDesc,
 		EmployeeID:           &testEmployeeID,
 		RoomID:               &testRoomID,
@@ -342,8 +342,7 @@ func TestReservationsHandlerCreateReservationAlreadyExist(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	code := "RSVN/20220710/003"
-	payload, err := json.Marshal(dto.CreateReservationRequestBody{ReservationCode: &code})
+	payload, err := json.Marshal(testCreatePayload)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -366,6 +365,7 @@ func TestReservationsHandlerCreateReservationAlreadyExist(t *testing.T) {
 
 func TestReservationsHandlerCreateSuccess(t *testing.T) {
 	seeder.NewSeeder().DeleteAll()
+	seeder.NewSeeder().SeedReservationStatus()
 
 	token, err := util.CreateJWTToken(adminClaims)
 	if err != nil {

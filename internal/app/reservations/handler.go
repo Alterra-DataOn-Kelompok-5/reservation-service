@@ -84,20 +84,13 @@ func (h *handler) Create(c echo.Context) error {
 	// log.Println(jwtClaims)
 
 	payload := new(dto.CreateReservationRequestBody)
-	payload = &dto.CreateReservationRequestBody{
-		ReservationCode:      payload.ReservationCode,
-		ReservationDesc:      payload.ReservationDesc,
-		EmployeeID:           &jwtClaims.UserID,
-		RoomID:               payload.RoomID,
-		ReservationTimeStart: payload.ReservationTimeStart,
-		ReservationTimeEnd:   payload.ReservationTimeEnd,
-	}
 	if err := c.Bind(payload); err != nil {
 		return res.ErrorBuilder(&res.ErrorConstant.BadRequest, err).Send(c)
 	}
 	if err := c.Validate(payload); err != nil {
 		return res.ErrorBuilder(&res.ErrorConstant.Validation, err).Send(c)
 	}
+	payload.EmployeeID = &jwtClaims.UserID
 
 	role, err := h.service.Store(c.Request().Context(), payload)
 	if err != nil {

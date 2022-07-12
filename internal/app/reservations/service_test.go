@@ -79,14 +79,6 @@ func TestReservationServiceUpdateByIdSuccess(t *testing.T) {
 
 	var (
 		asserts = assert.New(t)
-		// id      = uint(1)
-		// adminId = uint(1)
-		// status  = uint(1)
-		// payload = dto.UpdateReservationRequestBody{
-		// 	ID:                  &id,
-		// 	AdminID:             &adminId,
-		// 	ReservationStatusID: &status,
-		// }
 	)
 	res, err := reservationService.UpdateById(ctx, &testUpdatePayload)
 	fmt.Println("res stat id", res.ReservationStatusID)
@@ -120,18 +112,16 @@ func TestReservationServiceUpdateByIdRecordNotFound(t *testing.T) {
 func TestReservationServiceCreateReservationSuccess(t *testing.T) {
 	database.GetConnection()
 	seeder.NewSeeder().DeleteAll()
+	seeder.NewSeeder().SeedReservationStatus()
 
-	var (
-		asserts = assert.New(t)
-	)
-
+	asserts := assert.New(t)
 	res, err := reservationService.Store(ctx, &testCreatePayload)
 	fmt.Println("res:", res)
 	if err != nil {
 		t.Fatal(err)
 	}
 	asserts.NotEmpty(res.ID)
-	asserts.Equal(*testCreatePayload.ReservationCode, res.ReservationCode)
+	asserts.Equal(testCreatePayload.ReservationCode, res.ReservationCode)
 }
 
 func TestReservationServiceCreateReservationAlreadyExist(t *testing.T) {
@@ -143,7 +133,7 @@ func TestReservationServiceCreateReservationAlreadyExist(t *testing.T) {
 		asserts = assert.New(t)
 		code    = "RSVN/20220710/001"
 		payload = dto.CreateReservationRequestBody{
-			ReservationCode: &code,
+			ReservationCode: code,
 		}
 	)
 
