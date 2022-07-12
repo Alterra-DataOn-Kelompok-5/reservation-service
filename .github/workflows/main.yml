@@ -71,6 +71,6 @@ jobs:
               docker pull samuelcs/meeting-room-management-reservation-service:latest &&
               docker container stop reservation-api &&
               docker container rm reservation-api &&
-              docker container create --name reservation-api -p 8082:8082 ${DOCKER_HUB_CONTAINER} &&
+              docker container create --name reservation-api -p 8082:8082 samuelcs/meeting-room-management-reservation-service:latest &&
               docker container start reservation-api
           '
