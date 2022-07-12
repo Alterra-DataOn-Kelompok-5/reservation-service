@@ -69,8 +69,8 @@ jobs:
           
             #Now we have got the access of EC2 and we will start the deploy .
               docker pull samuelcs/meeting-room-management-reservation-service:latest &&
-              docker container stop reservation-api || true &&
-              docker container rm reservation-api || true &&
-              docker container create --name reservation-api -p 8082:8082 samuelcs/meeting-room-management-reservation-service:latest &&
-              docker container start reservation-api
+              docker container stop reservation-service || true &&
+              docker container rm reservation-service || true &&
+              docker container create --name reservation-service -p 8082:8082 samuelcs/meeting-room-management-reservation-service:latest &&
+              docker container start reservation-service
           '
